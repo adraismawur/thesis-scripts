@@ -13,10 +13,12 @@ from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 
 from data.database import Database
-from data.functions import get_bgc_ids, get_bio_pfam_ids, get_core_pfam_ids, get_features, get_hmm_ids
-from data.truth import distances_from_full_file, get_truth_from_distances
+from data.functions import get_bgc_id_name_dict, get_bgc_ids, get_bio_pfam_ids, get_core_pfam_ids, get_features, get_hmm_ids
+from data.truth import distances_from_full_file, pairs_from_distances
 from input.bigslice_hmm import get_bio_pfam, get_core_pfam
-from plots.hist import show_bigscape_distances
+from plots.hist import show_hist_plot_distances
+from predictions.euclidean import get_full_dist_from_euclidean, get_pred_from_euclidean
+# from validation.confusion import print_confusion_matrix
 
 CORE_PFAM_TSV = "C:/Users/Crude/Documents/Study/Thesis/Programs/bigslice/bigslice/db/advanced/templates/corepfam.tsv"
 BIO_PFAM_TSV = "C:/Users/Crude/Documents/Study/Thesis/Programs/bigslice/bigslice/db/advanced/templates/biopfam.tsv"
@@ -29,13 +31,10 @@ FULL_TSV = "bigscape_distances.tsv"
 bigscape_distances = distances_from_full_file(FULL_TSV)
 
 # show hist of true distances
-# show_bigscape_distances(bigscape_distances)
-
-true_pairs_under_treshold, true_pairs_over_treshold = get_truth_from_distances(bigscape_distances)
+show_hist_plot_distances(bigscape_distances, max=len(bigscape_distances), bins=50)
 
 
-
-
+truth = pairs_from_distances(bigscape_distances)
 
 
 DB = Database(SQLITE_DB)
@@ -43,7 +42,7 @@ DB = Database(SQLITE_DB)
 bgc_ids = get_bgc_ids(DB)
 hmm_ids = get_hmm_ids(DB)
 
-bgc_id_name_dict = dict()
+bgc_id_name_dict = get_bgc_id_name_dict(DB)
 
 core_pfam_accessions, core_pfam_names = get_core_pfam(CORE_PFAM_TSV)
 bio_pfam_accessions, bio_pfam_names = get_bio_pfam(BIO_PFAM_TSV)
@@ -76,14 +75,29 @@ for bgc_id, hmm_id, value in bgc_hmm_features:
     if count % 1000 == 0:
         print(count)
     features.at[bgc_id, hmm_id] = value
-    features_split.at[bgc_id, hmm_id] = value
-    if hmm_id in core_pfam_set:
-        features_split.at[bgc_id, "type"] = 0
-    elif hmm_id in bio_pfam_set:
-        features_split.at[bgc_id, "type"] = 1
+    # features_split.at[bgc_id, hmm_id] = value
+    # if hmm_id in core_pfam_set:
+    #     features_split.at[bgc_id, "type"] = 0
+    # elif hmm_id in bio_pfam_set:
+        # features_split.at[bgc_id, "type"] = 1
 
 
 
+euclidean_distances = get_full_dist_from_euclidean(features, bgc_id_name_dict, metric="euclidean")
+
+show_hist_plot_distances(euclidean_distances, bins=50)
+
+manhattan_distances = get_full_dist_from_euclidean(features, bgc_id_name_dict, metric="manhattan")
+
+show_hist_plot_distances(manhattan_distances, bins=50)
+
+seuclidean_distances = get_full_dist_from_euclidean(features, bgc_id_name_dict, metric="seuclidean")
+
+show_hist_plot_distances(seuclidean_distances, bins=50)
+
+# predictions = pairs_from_distances(euclidean_distances, 50)
+
+# print_confusion_matrix(truth, predictions)
 
 
 sys.exit()
