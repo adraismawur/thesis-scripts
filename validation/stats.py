@@ -4,6 +4,8 @@ def print_confusion_matrix(truth, predictions):
     Input:
         two lists of tuples with the same structure. each list contains a list of tuples of BGC
         pairs under the treshold or over the treshold specified earler in the program
+    
+    under threshold is considered a positive. over or equal to treshold is considered negative
     """
     true_pairs_under_treshold, true_pairs_over_treshold = truth
     pred_pairs_under_treshold, pred_pairs_over_treshold = predictions
