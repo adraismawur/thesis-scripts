@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def show_hist_plot_distances(full_distances, max=1000, bins=50):
+def from_distances(full_distances, max=1000, bins=50):
     distances = []
     for idx, distance_entry in enumerate(full_distances):
         if idx == max:

@@ -8,73 +8,61 @@ from sklearn.metrics import pairwise_distances
 
 import numpy as np
 import pandas as pd
-from sklearn.neighbors import NearestNeighbors
 
-import matplotlib.pyplot as plt
+import data
+import truth.truth as truth
+import input.paths as paths
+import input.bigslice_hmm
+import plots.hist
 
-from data.database import Database
-from data.functions import get_bgc_id_name_dict, get_bgc_ids, get_bio_pfam_ids, get_core_pfam_ids, get_features, get_hmm_ids
-from data.truth import distances_from_full_file, pairs_from_distances
-from input.bigslice_hmm import get_bio_pfam, get_core_pfam
-from plots.hist import show_hist_plot_distances
-from predictions.euclidean import get_full_dist_from_euclidean, get_pred_from_euclidean
+from predictions.distances.euclidean import get_distances
 # from validation.confusion import print_confusion_matrix
 
-CORE_PFAM_TSV = "C:/Users/Crude/Documents/Study/Thesis/Programs/bigslice/bigslice/db/advanced/templates/corepfam.tsv"
-BIO_PFAM_TSV = "C:/Users/Crude/Documents/Study/Thesis/Programs/bigslice/bigslice/db/advanced/templates/biopfam.tsv"
-SQLITE_DB = "C:/Users/Crude/Documents/Source/misc/data.db"
-
-# BIGSCAPE_CLUSTER_FILES = "/home/crude/benchmark-out/dev-100/network_files/2022-03-21_18-17-21_hybrids_global/"
-FULL_TSV = "bigscape_distances.tsv"
 
 # load truth values
-bigscape_distances = distances_from_full_file(FULL_TSV)
+TRUTH_DISTANCES = truth.from_file(paths.FULL_TSV)
 
 # show hist of true distances
-show_hist_plot_distances(bigscape_distances, max=len(bigscape_distances), bins=50)
+plots.hist.from_distances(TRUTH_DISTANCES, max=len(TRUTH_DISTANCES), bins=50)
 
 
-truth = pairs_from_distances(bigscape_distances)
+TRUTH_PAIRS = truth.pairs_from_distances(TRUTH_DISTANCES)
 
 
-DB = Database(SQLITE_DB)
+DB = data.Database(paths.SQLITE_DB)
 
-bgc_ids = get_bgc_ids(DB)
-hmm_ids = get_hmm_ids(DB)
+BGC_IDS = data.get_bgc_ids(DB)
+HMM_IDS = data.get_hmm_ids(DB)
 
-bgc_id_name_dict = get_bgc_id_name_dict(DB)
+BGC_ID_NAME_DICT = data.get_bgc_id_name_dict(DB)
 
-core_pfam_accessions, core_pfam_names = get_core_pfam(CORE_PFAM_TSV)
-bio_pfam_accessions, bio_pfam_names = get_bio_pfam(BIO_PFAM_TSV)
+CORE_PFAM_ACC, CORE_PFAM_NAMES = input.bigslice_hmm.get_core_pfam(paths.CORE_PFAM_TSV)
+BIO_PFAM_ACC, BIO_PFAM_NAMES = input.bigslice_hmm.get_bio_pfam(paths.BIO_PFAM_TSV)
 # get corresponding ids
-core_pfam_ids = get_core_pfam_ids(DB, core_pfam_accessions, core_pfam_names)
-bio_pfam_ids = get_bio_pfam_ids(DB, bio_pfam_accessions, bio_pfam_names)
-core_pfam_set = set(core_pfam_ids)
-bio_pfam_set = set(bio_pfam_ids)
+CORE_PFAM_IDS = data.get_core_pfam_ids(DB, CORE_PFAM_ACC, CORE_PFAM_NAMES)
+BIO_PFAM_IDS = data.get_bio_pfam_ids(DB, BIO_PFAM_ACC, BIO_PFAM_NAMES)
+CORE_PFAM_SET = set(CORE_PFAM_IDS)
+BIO_PFAM_SET = set(BIO_PFAM_IDS)
 
 
 # instantiate arrays
-features = pd.DataFrame(
-    np.zeros((len(bgc_ids), len(hmm_ids)), dtype=np.uint8),
-    index=bgc_ids,
-    columns=hmm_ids
+FEATURES = pd.DataFrame(
+    np.zeros((len(BGC_IDS), len(HMM_IDS)), dtype=np.uint8),
+    index=BGC_IDS,
+    columns=HMM_IDS
 )
 
 # this array contains info of which hmm is core and which is bio
-features_split = pd.DataFrame(
-    np.zeros((len(bgc_ids), len(hmm_ids) + 1), dtype=np.uint8),
-    index=bgc_ids,
-    columns=hmm_ids + ["type"]
+FEATURES_SPLIT = pd.DataFrame(
+    np.zeros((len(BGC_IDS), len(HMM_IDS) + 1), dtype=np.uint8),
+    index=BGC_IDS,
+    columns=HMM_IDS + ["type"]
 )
 
 # fetch feature values from db
-bgc_hmm_features = get_features(DB)
-count = 0
-for bgc_id, hmm_id, value in bgc_hmm_features:
-    count += 1
-    if count % 1000 == 0:
-        print(count)
-    features.at[bgc_id, hmm_id] = value
+BGC_HMM_FEATURES = data.get_features(DB)
+for bgc_id, hmm_id, value in BGC_HMM_FEATURES:
+    FEATURES.at[bgc_id, hmm_id] = value
     # features_split.at[bgc_id, hmm_id] = value
     # if hmm_id in core_pfam_set:
     #     features_split.at[bgc_id, "type"] = 0
@@ -83,17 +71,14 @@ for bgc_id, hmm_id, value in bgc_hmm_features:
 
 
 
-euclidean_distances = get_full_dist_from_euclidean(features, bgc_id_name_dict, metric="euclidean")
+EUCLIDEAN_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="euclidean")
+plots.hist.from_distances(EUCLIDEAN_DISTS, bins=50)
 
-show_hist_plot_distances(euclidean_distances, bins=50)
+MANHATTAN_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="manhattan")
+plots.hist.from_distances(MANHATTAN_DISTS, bins=50)
 
-manhattan_distances = get_full_dist_from_euclidean(features, bgc_id_name_dict, metric="manhattan")
-
-show_hist_plot_distances(manhattan_distances, bins=50)
-
-seuclidean_distances = get_full_dist_from_euclidean(features, bgc_id_name_dict, metric="seuclidean")
-
-show_hist_plot_distances(seuclidean_distances, bins=50)
+CHEBYSHEV_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="chebyshev")
+plots.hist.from_distances(CHEBYSHEV_DISTS, bins=50)
 
 # predictions = pairs_from_distances(euclidean_distances, 50)
 
@@ -121,15 +106,15 @@ birch = Birch(
 #     features_df.values
 # )
 
-birch.fit(features.values)
+birch.fit(FEATURES.values)
 
-predictions = birch.predict(features.values)
+predictions = birch.predict(FEATURES.values)
 num_clusters = max(predictions)
 clusters = [[] for i in range(num_clusters + 1)]
 
 for bgc_id, cluster in enumerate(predictions):
     idx = int(bgc_id) + 1
-    clusters[cluster].append(bgc_id_name_dict[idx])
+    clusters[cluster].append(BGC_ID_NAME_DICT[idx])
 
 # nn = NearestNeighbors(
 #     metric='euclidean',
@@ -173,7 +158,3 @@ for cluster in clusters:
                     if candidate in distance_dict[bgc]:
                         count += 1
                         print(bgc, candidate, distance_dict[bgc][candidate], len(cluster))
-
-
-
-print("memes")

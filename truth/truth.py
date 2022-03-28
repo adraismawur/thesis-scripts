@@ -67,7 +67,7 @@ def write_full_file(path, full_distances):
         for distance_entry in full_distances:
             fullfile.write("\t".join(distance_entry) + "\n")
 
-def distances_from_full_file(path):
+def from_file(path):
     ## distances from full file
     full_distances = []
     with open(path) as full_distances_file:
