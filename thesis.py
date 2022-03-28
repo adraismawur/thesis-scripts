@@ -15,8 +15,10 @@ import input.paths as paths
 import input.bigslice_hmm
 import plots.hist
 
-from predictions.distances.euclidean import get_distances
-# from validation.confusion import print_confusion_matrix
+import predictions
+
+import validation
+
 
 
 # load truth values
@@ -26,7 +28,7 @@ TRUTH_DISTANCES = truth.from_file(paths.FULL_TSV)
 plots.hist.from_distances(TRUTH_DISTANCES, max=len(TRUTH_DISTANCES), bins=50)
 
 
-TRUTH_PAIRS = truth.pairs_from_distances(TRUTH_DISTANCES)
+TRUTH_PAIRS = validation.pairs_from_distances(TRUTH_DISTANCES)
 
 
 DB = data.Database(paths.SQLITE_DB)
@@ -71,90 +73,19 @@ for bgc_id, hmm_id, value in BGC_HMM_FEATURES:
 
 
 
-EUCLIDEAN_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="euclidean")
+EUCLIDEAN_DISTS = predictions.get_distances(FEATURES, BGC_ID_NAME_DICT, metric="euclidean")
 plots.hist.from_distances(EUCLIDEAN_DISTS, bins=50)
 
-MANHATTAN_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="manhattan")
-plots.hist.from_distances(MANHATTAN_DISTS, bins=50)
+# MANHATTAN_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="manhattan")
+# plots.hist.from_distances(MANHATTAN_DISTS, bins=50)
 
-CHEBYSHEV_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="chebyshev")
-plots.hist.from_distances(CHEBYSHEV_DISTS, bins=50)
+# CHEBYSHEV_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="chebyshev")
+# plots.hist.from_distances(CHEBYSHEV_DISTS, bins=50)
 
-# predictions = pairs_from_distances(euclidean_distances, 50)
+euclid_pred = validation.pairs_from_distances(EUCLIDEAN_DISTS, 50)
 
-# print_confusion_matrix(truth, predictions)
+validation.print_confusion_matrix(TRUTH_PAIRS, euclid_pred)
 
+birch_pred = predictions.cluster_birch(FEATURES, BGC_ID_NAME_DICT, threshold=0.5, flat=False)
 
-sys.exit()
-
-# initiate birch object
-birch = Birch(
-    # n_clusters=None,  # no global clustering
-    # compute_labels=False,  # only calc centroids
-    copy=False  # data already copied
-)
-
-# set threshold
-# birch.threshold = fetch_threshold(features_df, 1)
-# birch.threshold = 0.1
-
-# set flat birch
-# birch.branching_factor = features_df.shape[0]
-
-# call birch
-# pp_stuff = preprocess(
-#     features_df.values
-# )
-
-birch.fit(FEATURES.values)
-
-predictions = birch.predict(FEATURES.values)
-num_clusters = max(predictions)
-clusters = [[] for i in range(num_clusters + 1)]
-
-for bgc_id, cluster in enumerate(predictions):
-    idx = int(bgc_id) + 1
-    clusters[cluster].append(BGC_ID_NAME_DICT[idx])
-
-# nn = NearestNeighbors(
-#     metric='euclidean',
-#     algorithm='brute',
-#     n_jobs=1)
-# nn.fit(features_df.values)
-
-# # perform nearest neighbor search
-# dists, centroids_idx = nn.kneighbors(X=features_df.values,
-#                                         n_neighbors=3,
-#                                             return_distance=True)
-
-# cutoff = 50
-
-# clusters = []
-# for bgc_idx, dist_set in enumerate(dists):
-#     if max(dist_set[1:]) == 0:
-#         continue
-#     if min(dist_set[1:]) > cutoff:
-#         continue
-
-#     # append self
-#     clusters.append([bgc_id_name_dict[bgc_idx+1]])
-
-#     for idx, dist in enumerate(dist_set[1:]):
-#         if dist < cutoff:
-#             clusters[-1].append(bgc_id_name_dict[centroids_idx[bgc_idx][idx]+1])
-
-count = 0
-for cluster in clusters:
-    if count > 10:
-        break
-    if len(cluster) > 1:
-        for bgc_f in cluster:
-            bgc = bgc_f.split("/")[1] 
-            if bgc in distance_dict:
-                for candidate_f in cluster:
-                    candidate = candidate_f.split("/")[1]
-                    if bgc == candidate:
-                        continue
-                    if candidate in distance_dict[bgc]:
-                        count += 1
-                        print(bgc, candidate, distance_dict[bgc][candidate], len(cluster))
+validation.print_confusion_matrix(TRUTH_PAIRS, birch_pred)

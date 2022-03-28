@@ -1,11 +1,52 @@
+from sklearn.cluster import Birch
 from bigscape_functions import fetch_threshold
 
-def gen_bigslice_clusters(df):
-    threshold = fetch_threshold(df)
-    return gen_clusters(df, threshold)
+def cluster_birch(features, bgc_id_name_dict, n_clusters=None, compute_labels=False, threshold=None, flat=True):
+    """Generates clusters using birch. By default this copies the method used in bigslice"""
+    # initiate birch object
+    birch = Birch(
+        # n_clusters=None,  # no global clustering
+        # compute_labels=False,  # only calc centroids
+        copy=False  # data already copied
+    )
 
-def gen_default_clusters(features):
-    return gen_clusters(features)
+    # get threshold
+    if not threshold:
+        threshold = fetch_threshold(features, 1)
 
-def gen_clusters(features, threshold=0.5, flat=False):
-    return   
+    # set threshold
+    birch.threshold = threshold
+
+    # set flat birch
+    if flat:
+        birch.branching_factor = features.shape[0]
+
+    # call birch
+    # pp_stuff = preprocess(
+    #     features_df.values
+    # )
+
+    birch.fit(features.values)
+
+    predictions = birch.predict(features.values)
+
+    num_clusters = max(predictions)
+    clusters = [[] for i in range(num_clusters + 1)]
+
+    for bgc_id, cluster in enumerate(predictions):
+        idx = int(bgc_id) + 1
+        clusters[cluster].append(bgc_id_name_dict[idx])
+
+
+    # turn predictions into pair list
+    pred_under_cutoff = set()
+    pred_over_cutoff = set()
+    for cluster_idx in range(len(clusters)):
+        for other_cluster_idx, cluster in enumerate(clusters[cluster_idx:]):
+            for idx, bgc_a in enumerate(cluster):
+                for bgc_b in cluster[idx+1:]:
+                    if cluster_idx == other_cluster_idx:
+                        pred_under_cutoff.add((bgc_a, bgc_b))
+                    else:
+                        pred_over_cutoff.add((bgc_a, bgc_b))
+    return pred_under_cutoff, pred_over_cutoff

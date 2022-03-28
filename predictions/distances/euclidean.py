@@ -1,6 +1,6 @@
 from sklearn.neighbors import NearestNeighbors
 
-def get_distances(features, bgc_id_name_dict, cutoff=50,
+def get_distances(features, bgc_id_name_dict,
                   metric='euclidean', algorithm='auto',
                   p=2, w=1, V=1):
 
