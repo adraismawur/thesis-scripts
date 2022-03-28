@@ -20,7 +20,7 @@ import predictions
 import validation
 
 
-
+print("Loading truth")
 # load truth values
 TRUTH_DISTANCES = truth.from_file(paths.FULL_TSV)
 
@@ -30,7 +30,7 @@ plots.hist.from_distances(TRUTH_DISTANCES, max=len(TRUTH_DISTANCES), bins=50)
 
 TRUTH_PAIRS = validation.pairs_from_distances(TRUTH_DISTANCES)
 
-
+print("Loading stored info from database")
 DB = data.Database(paths.SQLITE_DB)
 
 BGC_IDS = data.get_bgc_ids(DB)
@@ -47,6 +47,7 @@ CORE_PFAM_SET = set(CORE_PFAM_IDS)
 BIO_PFAM_SET = set(BIO_PFAM_IDS)
 
 
+print("Instantiating dataframes")
 # instantiate arrays
 FEATURES = pd.DataFrame(
     np.zeros((len(BGC_IDS), len(HMM_IDS)), dtype=np.uint8),
@@ -72,20 +73,28 @@ for bgc_id, hmm_id, value in BGC_HMM_FEATURES:
         # features_split.at[bgc_id, "type"] = 1
 
 
-
+print("Calculating euclidean distance")
 EUCLIDEAN_DISTS = predictions.get_distances(FEATURES, BGC_ID_NAME_DICT, metric="euclidean")
 plots.hist.from_distances(EUCLIDEAN_DISTS, bins=50)
 
+# print("Calculating manhattan distance")
 # MANHATTAN_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="manhattan")
 # plots.hist.from_distances(MANHATTAN_DISTS, bins=50)
 
+# print("Calculating Chebyshev distance")
 # CHEBYSHEV_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="chebyshev")
 # plots.hist.from_distances(CHEBYSHEV_DISTS, bins=50)
 
+print("\n")
+print("Predictions from euclidean distances:")
 euclid_pred = validation.pairs_from_distances(EUCLIDEAN_DISTS, 50)
 
 validation.print_confusion_matrix(TRUTH_PAIRS, euclid_pred)
 
-birch_pred = predictions.cluster_birch(FEATURES, BGC_ID_NAME_DICT, threshold=0.5, flat=False)
+print("\n")
+print("Predictions from birch clustering:")
+birch_pred = predictions.cluster_birch(FEATURES, BGC_ID_NAME_DICT, n_clusters=50, threshold=0.5, flat=False)
 
 validation.print_confusion_matrix(TRUTH_PAIRS, birch_pred)
+
+
