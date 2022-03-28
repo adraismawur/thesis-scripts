@@ -1,6 +1,6 @@
 from bigscape_functions import fetch_threshold
 
-def gen_bigscape_clusters(df):
+def gen_bigslice_clusters(df):
     threshold = fetch_threshold(df)
     return gen_clusters(df, threshold)
 
