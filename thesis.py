@@ -58,26 +58,15 @@ FEATURES = pd.DataFrame(
     columns=HMM_IDS
 )
 
-# this dataframe contains info of which hmm is core and which is bio
-FEATURES_SPLIT = pd.DataFrame(
-    np.zeros((len(BGC_IDS), len(HMM_IDS) + 1), dtype=np.uint8),
-    index=BGC_IDS,
-    columns=HMM_IDS + ["type"]
-)
-
-# this dataframe contains sums of features from biosynthetic pfams and core pfams separately
-FEATURES_SUMMED = 
-
 # fetch feature values from db
 BGC_HMM_FEATURES = data.get_features(DB)
 for bgc_id, hmm_id, value in BGC_HMM_FEATURES:
     FEATURES.at[bgc_id, hmm_id] = value
-    # features_split.at[bgc_id, hmm_id] = value
-    # if hmm_id in core_pfam_set:
-    #     features_split.at[bgc_id, "type"] = 0
-    # elif hmm_id in bio_pfam_set:
-        # features_split.at[bgc_id, "type"] = 1
 
+# this dataframe contains sums of features from biosynthetic pfams and core pfams separately
+# SUMS_CORE = pd.DataFrame(FEATURES[CORE_PFAM_IDS].sum(axis=1), columns=["sum_core"])
+# SUMS_BIO = pd.DataFrame(FEATURES[BIO_PFAM_IDS].sum(axis=1), columns=["sum_bio"])
+# FEATURES_SUMS = pd.merge(SUMS_CORE, SUMS_BIO, left_index=True, right_index=True)
 
 # print("Calculating euclidean distance")
 # EUCLIDEAN_DISTS = predictions.get_distances(FEATURES, BGC_ID_NAME_DICT, metric="euclidean")
