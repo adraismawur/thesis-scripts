@@ -41,12 +41,8 @@ def cluster_birch(features, bgc_id_name_dict, n_clusters=None, compute_labels=Fa
     # turn predictions into pair list
     pred_under_cutoff = set()
     pred_over_cutoff = set()
-    for cluster_idx in range(len(clusters)):
-        for other_cluster_idx, cluster in enumerate(clusters[cluster_idx:]):
-            for idx, bgc_a in enumerate(cluster):
-                for bgc_b in cluster[idx+1:]:
-                    if cluster_idx == other_cluster_idx:
-                        pred_under_cutoff.add((bgc_a, bgc_b))
-                    else:
-                        pred_over_cutoff.add((bgc_a, bgc_b))
+    for cluster in clusters:
+        for idx, bgc_a in enumerate(cluster):
+            for bgc_b in cluster[idx+1:]:
+                pred_under_cutoff.add((bgc_a, bgc_b))
     return pred_under_cutoff, pred_over_cutoff
