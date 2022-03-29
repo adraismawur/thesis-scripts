@@ -14,7 +14,7 @@ def run(features, bgc_id_name_dict, truth_pairs):
     print("Predictions from k-means clustering:")
     validation.print_stats_header(["n_clus"])
     
-    for i in range(5, 20):
+    for i in range(5, 51):
         n_clusters = i
 
         kmeans_pairs = predictions.cluster_kmeans(
