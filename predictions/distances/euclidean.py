@@ -8,6 +8,7 @@ def get_distances(features, bgc_id_name_dict,
     if metric in no_parameters:
         nn = NearestNeighbors(
         metric=metric,
+        n_neighbors=1000,
         algorithm=algorithm,
         n_jobs=1)
         nn.fit(features.values)
@@ -16,18 +17,19 @@ def get_distances(features, bgc_id_name_dict,
 
     full_distances = []
 
-    for i, distances in enumerate(dists):
+    for bgc_a_idx, distances in enumerate(dists):
         # skip any that have no distances beyond itself
         if len(distances) == 1:
             continue
 
         # record name
-        bgc_a = bgc_id_name_dict[i + 1]
+        bgc_a = bgc_id_name_dict[bgc_a_idx + 1]
 
-        # skip first one since it is always itself
-
-        for j, distance in enumerate(distances[1:]):
-            bgc_b = bgc_id_name_dict[centroids_idx[i][j] + 1]
+        for distance_partner_idx, distance in enumerate(distances):
+            bgc_b_idx = centroids_idx[bgc_a_idx][distance_partner_idx]
+            if bgc_b_idx == bgc_a_idx:
+                continue
+            bgc_b = bgc_id_name_dict[bgc_b_idx + 1]
             full_distances.append([bgc_a, bgc_b, distance])
 
     return full_distances

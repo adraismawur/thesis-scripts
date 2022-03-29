@@ -5,8 +5,8 @@ def cluster_birch(features, bgc_id_name_dict, n_clusters=None, compute_labels=Fa
     """Generates clusters using birch. By default this copies the method used in bigslice"""
     # initiate birch object
     birch = Birch(
-        # n_clusters=None,  # no global clustering
-        # compute_labels=False,  # only calc centroids
+        n_clusters=n_clusters,  # no global clustering
+        compute_labels=compute_labels,  # only calc centroids
         copy=False  # data already copied
     )
 
@@ -41,8 +41,16 @@ def cluster_birch(features, bgc_id_name_dict, n_clusters=None, compute_labels=Fa
     # turn predictions into pair list
     pred_under_cutoff = set()
     pred_over_cutoff = set()
-    for cluster in clusters:
-        for idx, bgc_a in enumerate(cluster):
-            for bgc_b in cluster[idx+1:]:
-                pred_under_cutoff.add((bgc_a, bgc_b))
-    return pred_under_cutoff, pred_over_cutoff
+    pred_unclassified = set()
+
+    for cluster_a_idx in range(len(clusters)):
+        for cluster_b_idx, cluster_b in enumerate(clusters[cluster_a_idx:]):
+            for idx, bgc_a in enumerate(cluster_b):
+                for bgc_b in cluster_b[idx+1:]:
+                    pair = tuple(sorted((bgc_a, bgc_b)))
+                    if cluster_a_idx == cluster_b_idx:
+                        pred_under_cutoff.add(pair)
+                    else:
+                        pred_over_cutoff.add(pair)
+
+    return pred_under_cutoff, pred_over_cutoff, pred_unclassified
