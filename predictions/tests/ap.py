@@ -17,9 +17,9 @@ def run(features, bgc_id_name_dict, truth_pairs):
     # for i in range(5, 51):
         # n_clusters = i
 
-    kmeans_pairs = predictions.cluster_ap(
+    ap_pairs = predictions.cluster_ap(
         features,
         bgc_id_name_dict
     )
 
-    validation.print_stats_row([], truth_pairs, kmeans_pairs)
+    validation.print_stats_row([], truth_pairs, ap_pairs)
