@@ -84,7 +84,14 @@ for bgc_id, hmm_id, value in BGC_HMM_FEATURES:
 # CHEBYSHEV_DISTS = get_distances(FEATURES, BGC_ID_NAME_DICT, metric="chebyshev")
 # plots.hist.from_distances(CHEBYSHEV_DISTS, bins=50)
 
-predictions.tests.kmeans.run(FEATURES, BGC_ID_NAME_DICT, TRUTH_PAIRS)
+# clustering using birch
+# predictions.test.birch.run(FEATURES, BGC_ID_NAME_DICT, TRUTH_PAIRS)
+
+# print("Clustering using kmeans")
+# predictions.test.birch.run(FEATURES, BGC_ID_NAME_DICT, TRUTH_PAIRS)
+ 
+# print("Clustering using Affinity Propagation on feature sums")
+# predictions.tests.ap.run(FEATURES, BGC_ID_NAME_DICT, TRUTH_PAIRS)
 
 sys.exit()
 
