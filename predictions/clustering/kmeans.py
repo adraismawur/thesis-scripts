@@ -1,7 +1,7 @@
 from sklearn.cluster import KMeans
 
-def cluster_kmeans(features, bgc_id_name_dict, n_clusters):
-    kmeans = KMeans(n_clusters, copy_x=False)
+def cluster_kmeans(features, bgc_id_name_dict, max_iter, n_clusters):
+    kmeans = KMeans(n_clusters, max_iter=max_iter, copy_x=False)
     results = kmeans.fit(features)
 
     num_clusters = max(results.labels_)
