@@ -8,7 +8,7 @@ def run(euclidean_dists, truth_pairs):
     print("Predictions from euclidean distances (both):")
     validation.print_stats_header(["cut_low", "cut_upp"])
     # generate a set of cutoffs
-    for i in range(10):
+    for i in range(5):
         for j in range(10):
             lower_cutoff = i * 10
             upper_cutoff = j * 100
