@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def pairs_from_distances(full_distances, lower_cutoff=0.3, upper_cutoff=0.3):
     """Generates three lists of tuples, each tuple is a pair of BGCs. The first
     list contains pairs which are under the treshold, the second list contains
@@ -60,3 +63,33 @@ def check_pairs_present(truth_pairs, pred_pairs):
     all_pred = pred_pairs[0] | pred_pairs[1] | pred_pairs[2]
     
     return len(all_pred.difference(all_truth)) == 0
+
+def labels_from_distances(distances, bgc_name_id_dict, bgc_ids, cutoff=0.3):
+    """Generates a set of labels associated with bgcs from a set of distances
+    in the form of a dataframe
+    """
+    bgc_labels = {}
+    label_index = 1
+
+    for distance_row in distances:
+        bgc_a_name, bgc_b_name, distance = distance_row
+        bgc_a_id = bgc_name_id_dict[bgc_a_name]
+        bgc_b_id = bgc_name_id_dict[bgc_b_name]
+        if distance < cutoff:
+            if bgc_a_id in bgc_labels:
+                bgc_labels[bgc_b_id] = bgc_labels[bgc_a_id]
+            elif bgc_b_id in bgc_labels:
+                bgc_labels[bgc_a_id] = bgc_labels[bgc_b_id]
+            else:
+                bgc_labels[bgc_a_id] = label_index
+                bgc_labels[bgc_b_id] = label_index
+                label_index += 1
+    
+    # assign any not found in list to label 0
+    for bgc_id in bgc_ids:
+        if bgc_id not in bgc_labels:
+            bgc_labels[bgc_id] = 0
+    
+
+    
+    return pd.DataFrame.from_dict(bgc_labels, orient="index", columns=["label"])
