@@ -61,15 +61,21 @@ def run_lower(distances, truth_pairs):
                 euclid_pred
             )
 
-def run_upper(distances, truth_pairs):
+def run_upper(
+    distances,
+    truth_pairs,
+    upper_range = 10,
+    upper_cutoff_step = 100,
+    upper_cutoff_start = 100
+):
     """Performs a run of distance cutoff classficiation tests with cutoffs
     on only on the upper side (distant BGCs)"""
     
     print("Predictions from distances (upper only):")
     validation.print_stats_header(["cut_upp"])
     # generate a set of cutoffs
-    for i in range(20):
-            upper_cutoff = i * 100
+    for i in range(upper_range):
+            upper_cutoff = i * upper_cutoff_step + upper_cutoff_start
             pred_pairs = validation.pairs_from_distances(
                 distances,
                 None,
