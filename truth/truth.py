@@ -2,7 +2,7 @@ import os
 import sys
 
 
-def get_distances_from_results(result_path, cutoff, bigscape_cutoff=0.3):
+def get_distances_from_results(result_path, cutoff, bigscape_cutoff="0.3"):
     full_distances = []
 
     # distances from network files
