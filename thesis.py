@@ -103,7 +103,7 @@ LABEL_LIST = [TRUTH_LABELS.at[bgc_id,"label"] for bgc_id in BGC_IDS]
 # predictions.tests.distance.run_upper(CHEBYSHEV_DISTS, TRUTH_PAIRS)
 
 print("Calculating cosine similarity")
-COSINE_DISTS = predictions.get_cosine_distance(FEATURES, BGC_ID_NAME_DICT)
+COSINE_DISTS = predictions.get_cosine_distance(FEATURES.replace({np.nan: 0}), BGC_ID_NAME_DICT)
 predictions.tests.distance.run_both(
     COSINE_DISTS,
     TRUTH_PAIRS,

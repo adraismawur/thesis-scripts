@@ -27,6 +27,7 @@ def get_distances(features, bgc_id_name_dict,
 
         for distance_partner_idx, distance in enumerate(distances):
             bgc_b_idx = centroids_idx[bgc_a_idx][distance_partner_idx]
+            # skip self comparison
             if bgc_b_idx == bgc_a_idx:
                 continue
             bgc_b = bgc_id_name_dict[bgc_b_idx + 1]

@@ -75,7 +75,7 @@ def run_upper(
     validation.print_stats_header(["cut_upp"])
     # generate a set of cutoffs
     for i in range(upper_range):
-            upper_cutoff = i * upper_cutoff_step + upper_cutoff_start
+            upper_cutoff = round(i * upper_cutoff_step + upper_cutoff_start, 3)
             pred_pairs = validation.pairs_from_distances(
                 distances,
                 None,
