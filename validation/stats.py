@@ -2,13 +2,15 @@ def get_metrics(truth_positive, truth_negative, prediction_positive, prediction_
     """Generates the tp/fp/tn/fn metrics for validation from a set of truth pairs and prediction pairs"""
     missing_positives = truth_positive - prediction_positive
     missing_negatives = truth_negative - prediction_negative
+    positives_not_in_bigscape = prediction_positive - truth_positive
+    negatives_not_in_bigscape = prediction_negative - truth_negative
 
     true_positive = truth_positive & prediction_positive
     TP = len(true_positive)
     false_positive = truth_negative & prediction_positive
-    FP = len(false_positive)
+    FP = len(false_positive) + len(positives_not_in_bigscape)
     true_negative = truth_negative & prediction_negative
-    TN = len(true_negative)
+    TN = len(true_negative) + len(negatives_not_in_bigscape)
     false_negative = truth_positive & prediction_negative
     FN = len(false_negative)
     return TP, FP, TN, FN

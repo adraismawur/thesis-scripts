@@ -26,6 +26,12 @@ TRUTH_PAIRS = validation.pairs_from_distances(TRUTH_DISTANCES)
 print("Loading stored info from database")
 DB = data.Database(paths.SQLITE_DB)
 
+
+validation.print_full_stats(
+    TRUTH_PAIRS,
+    TRUTH_PAIRS
+)
+
 BGC_IDS = data.get_bgc_ids(DB)
 HMM_IDS = data.get_hmm_ids(DB)
 
