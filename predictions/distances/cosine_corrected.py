@@ -1,13 +1,23 @@
 import multiprocessing
 import math
 
+from numpy import mean
+
 def cosine_worker(
     working_q,
     output_q,
     bgc_name_id_dict,
     bgc_hmm_ids,
-    bgc_hmm_values
+    bgc_hmm_values,
+    imputation="zero"
 ):
+    bgc_imputation_values = {}
+    for bgc_id in bgc_hmm_values:
+        if imputation == "zero":
+            bgc_imputation_values[bgc_id] = 0
+        if imputation == "average":
+            bgc_imputation_values[bgc_id] = sum(list(bgc_hmm_values[bgc_id].values())) / len(bgc_hmm_values[bgc_id].values())
+
     while True:
         bgc_name_a, bgc_name_b, truth_dist = working_q.get(True)
         if bgc_name_a is None:
@@ -28,6 +38,9 @@ def cosine_worker(
         # get values
         hmm_values_a = bgc_hmm_values[bgc_a_id]
         hmm_values_b = bgc_hmm_values[bgc_b_id]
+        
+        imputation_value_a = bgc_imputation_values[bgc_a_id]
+        imputation_value_b = bgc_imputation_values[bgc_b_id]
 
         # get sum product
         sum_product = 0
@@ -37,12 +50,12 @@ def cosine_worker(
             if hmm_id in hmm_values_a:
                 value_a = hmm_values_a[hmm_id]
             else:
-                value_a = 0
+                value_a = imputation_value_a
 
             if hmm_id in hmm_values_b:
                 value_b = hmm_values_b[hmm_id]
             else:
-                value_b = 0
+                value_b = imputation_value_b
             
             sum_product += value_a * value_b
             a_list.append(value_a ** 2)
@@ -62,7 +75,8 @@ def get_corr_cosine_dists(
     truth_distances,
     bgc_hmm_features,
     bgc_ids,
-    bgc_name_id_dict
+    bgc_name_id_dict,
+    imputation="zero"
 ):
     
     # set up a dict where we can quickly retrieve the relevant features for each pair of bgcs
@@ -98,7 +112,8 @@ def get_corr_cosine_dists(
                 output_q,
                 bgc_name_id_dict,
                 BGC_HMM_IDS,
-                BGC_HMM_VALUES
+                BGC_HMM_VALUES,
+                imputation
             ))
         processes.append(new_process)
         new_process.start()

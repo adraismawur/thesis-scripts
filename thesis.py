@@ -119,12 +119,29 @@ if __name__ == '__main__':
     BGC_HMM_FEATURES = data.get_features(DB)
     for bgc_id, hmm_id, value in BGC_HMM_FEATURES:
         FEATURES.at[bgc_id, hmm_id] = value
+    
+    print("Done")
 
+    print("Calculating corrected cosine distances...")
 
+    COSINE_DIST_CORR = predictions.get_corr_cosine_dists(
+        TRUTH_DISTANCES,
+        BGC_HMM_FEATURES,
+        BGC_IDS,
+        BGC_NAME_ID_DICT,
+        "average"
+    )
+    print("Done")
 
     PREDICTION_PAIRS = validation.pairs_from_distances(COSINE_DIST_CORR, None, 0.69999999)
     
-    predictions.tests.distance.run_upper(COSINE_DIST_CORR, )
+    predictions.tests.distance.run_upper(
+        PREDICTION_PAIRS,
+        TRUTH_PAIRS,
+        upper_range=8,
+        upper_cutoff_start=0.3,
+        upper_cutoff_step=0.1
+    )
 
     # draw a histogram of value distribution in the features
     # plt.hist(FEATURES.sample(10), density=True)
