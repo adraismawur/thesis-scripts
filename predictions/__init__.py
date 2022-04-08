@@ -3,3 +3,4 @@ from .clustering.kmeans import *
 from .clustering.ap import *
 from .distances.cosine import *
 from .distances.euclidean import *
+from .distances.cosine_corrected import *
