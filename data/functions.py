@@ -16,7 +16,7 @@ def get_hmm_ids(db):
         ]
     )]
 
-def get_bgc_id_name_dict(db):
+def get_bgc_id_name_dict(db, split=False):
     bgc_id_name_dict = dict()
     for row in db.select(
         "bgc",
@@ -26,7 +26,11 @@ def get_bgc_id_name_dict(db):
             "bgc.name"
         ]
     ):
-        bgc_id_name_dict[row["id"]] = row["name"]
+        if split:
+            name = row["name"].split("/")[-1]
+        else:
+            name = row["name"]
+        bgc_id_name_dict[row["id"]] = name
     return bgc_id_name_dict
 
 
