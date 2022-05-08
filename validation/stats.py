@@ -8,9 +8,9 @@ def get_metrics(truth_positive, truth_negative, prediction_positive, prediction_
     true_positive = truth_positive & prediction_positive
     TP = len(true_positive)
     false_positive = truth_negative & prediction_positive
-    FP = len(false_positive) + len(positives_not_in_bigscape)
+    FP = len(false_positive)
     true_negative = truth_negative & prediction_negative
-    TN = len(true_negative) + len(negatives_not_in_bigscape)
+    TN = len(true_negative)
     false_negative = truth_positive & prediction_negative
     FN = len(false_negative)
     return TP, FP, TN, FN

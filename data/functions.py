@@ -26,7 +26,7 @@ def get_bgc_id_name_dict(db):
             "bgc.name"
         ]
     ):
-        bgc_id_name_dict[row["id"]] = row["name"].split('/')[1]
+        bgc_id_name_dict[row["id"]] = row["name"]
     return bgc_id_name_dict
 
 
