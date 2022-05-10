@@ -41,7 +41,8 @@ def run_lower(
     truth_pairs,
     lower_range = 5,
     lower_cutoff_step = 10,
-    lower_cutoff_start = 10
+    lower_cutoff_start = 10,
+    invert = False
 ):
     """Performs a run of distance cutoff classficiation tests with cutoffs
     on only on the lower side (near BGCs)
@@ -51,13 +52,16 @@ def run_lower(
     print("Predictions from distances (lower only):")
     validation.print_stats_header(["cut_low"])
     # generate a set of cutoffs
-    for i in range(10):
+    for i in range(lower_range):
             lower_cutoff = round(i * lower_cutoff_step + lower_cutoff_start, 3)
             euclid_pred = validation.pairs_from_distances(
                 distances,
                 lower_cutoff,
                 None
             )
+
+            if invert:
+                euclid_pred = (euclid_pred[1], euclid_pred[0], euclid_pred[2])
 
             validation.print_stats_row(
                 [
@@ -72,7 +76,8 @@ def run_upper(
     truth_pairs,
     upper_range = 10,
     upper_cutoff_step = 100,
-    upper_cutoff_start = 100
+    upper_cutoff_start = 100,
+    invert = False
 ):
     """Performs a run of distance cutoff classficiation tests with cutoffs
     on only on the upper side (distant BGCs)"""
@@ -87,6 +92,9 @@ def run_upper(
                 None,
                 upper_cutoff
             )
+
+            if invert:
+                pred_pairs = (pred_pairs[1], pred_pairs[0], pred_pairs[2])
 
             validation.print_stats_row(
                 [
