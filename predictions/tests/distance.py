@@ -1,4 +1,5 @@
 import validation
+from validation.stats import get_metrics
 
 
 def run_both(
@@ -52,24 +53,36 @@ def run_lower(
     print("Predictions from distances (lower only):")
     validation.print_stats_header(["cut_low"])
     # generate a set of cutoffs
+    results = []
     for i in range(lower_range):
-            lower_cutoff = round(i * lower_cutoff_step + lower_cutoff_start, 3)
-            euclid_pred = validation.pairs_from_distances(
-                distances,
-                lower_cutoff,
-                None
-            )
+        lower_cutoff = round(i * lower_cutoff_step + lower_cutoff_start, 3)
+        euclid_pred = validation.pairs_from_distances(
+            distances,
+            lower_cutoff,
+            None
+        )
 
-            if invert:
-                euclid_pred = (euclid_pred[1], euclid_pred[0], euclid_pred[2])
+        if invert:
+            euclid_pred = (euclid_pred[1], euclid_pred[0], euclid_pred[2])
 
-            validation.print_stats_row(
-                [
-                    str(lower_cutoff)
-                ],
-                truth_pairs,
-                euclid_pred
-            )
+        validation.print_stats_row(
+            [
+                str(lower_cutoff)
+            ],
+            truth_pairs,
+            euclid_pred
+        )
+        truth_positive, truth_negative, truth_unclassified = truth_pairs
+        pred_positive, pred_negative, pred_unclassified = euclid_pred
+        TP, FP, TN, FN = get_metrics(
+            truth_positive,
+            truth_negative,
+            pred_positive,
+            pred_negative
+        )
+        results.append((lower_cutoff, TP, FP, TN, FN))
+
+    return results
 
 def run_upper(
     distances,
