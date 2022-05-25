@@ -52,28 +52,28 @@ def run_lower(
     
     print("Predictions from distances (lower only):")
     validation.print_stats_header(["cut_low"])
-    # generate a set of cutoffs
     results = []
+    # generate a set of cutoffs
     for i in range(lower_range):
         lower_cutoff = round(i * lower_cutoff_step + lower_cutoff_start, 3)
-        euclid_pred = validation.pairs_from_distances(
+        pred_pairs = validation.pairs_from_distances(
             distances,
             lower_cutoff,
             None
         )
 
         if invert:
-            euclid_pred = (euclid_pred[1], euclid_pred[0], euclid_pred[2])
+            pred_pairs = (pred_pairs[1], pred_pairs[0], pred_pairs[2])
 
         validation.print_stats_row(
             [
                 str(lower_cutoff)
             ],
             truth_pairs,
-            euclid_pred
+            pred_pairs
         )
         truth_positive, truth_negative, truth_unclassified = truth_pairs
-        pred_positive, pred_negative, pred_unclassified = euclid_pred
+        pred_positive, pred_negative, pred_unclassified = pred_pairs
         TP, FP, TN, FN = get_metrics(
             truth_positive,
             truth_negative,
@@ -97,23 +97,34 @@ def run_upper(
     
     print("Predictions from distances (upper only):")
     validation.print_stats_header(["cut_upp"])
+    results = []
     # generate a set of cutoffs
     for i in range(upper_range):
-            upper_cutoff = round(i * upper_cutoff_step + upper_cutoff_start, 3)
-            pred_pairs = validation.pairs_from_distances(
-                distances,
-                None,
-                upper_cutoff
-            )
+        upper_cutoff = round(i * upper_cutoff_step + upper_cutoff_start, 3)
+        pred_pairs = validation.pairs_from_distances(
+            distances,
+            None,
+            upper_cutoff
+        )
 
-            if invert:
-                pred_pairs = (pred_pairs[1], pred_pairs[0], pred_pairs[2])
+        if invert:
+            pred_pairs = (pred_pairs[1], pred_pairs[0], pred_pairs[2])
 
-            validation.print_stats_row(
-                [
-                    str(upper_cutoff)
-                ],
-                truth_pairs,
-                pred_pairs
-            )
+        validation.print_stats_row(
+            [
+                str(upper_cutoff)
+            ],
+            truth_pairs,
+            pred_pairs
+        )
+        truth_positive, truth_negative, truth_unclassified = truth_pairs
+        pred_positive, pred_negative, pred_unclassified = pred_pairs
+        TP, FP, TN, FN = get_metrics(
+            truth_positive,
+            truth_negative,
+            pred_positive,
+            pred_negative
+        )
+        results.append((upper_cutoff, TP, FP, TN, FN))
+    return results
 
