@@ -73,6 +73,7 @@ def get_bgcs_in_bigscape(full_distances):
 def write_full_file(path, full_distances):
     with open(path, "w", encoding="utf-8") as fullfile:
         for distance_entry in full_distances:
+            distance_entry[2] = str(distance_entry[2])
             fullfile.write("\t".join(distance_entry) + "\n")
 
 def from_file(path):
